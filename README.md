@@ -1,1 +1,1 @@
-# Tac-Tic-Toe
+# Tac-Tic-Toe aka tactic-toe
