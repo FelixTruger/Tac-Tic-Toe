@@ -123,5 +123,3 @@ if __name__ == '__main__':
     This is free software, and you are welcome to redistribute it\n\
     under certain conditions; see GPL for details.")
     showMenu()
-
-
