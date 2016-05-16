@@ -6,6 +6,9 @@ player = 'X' # x begins the game
 Size = 0
 bot = 0
 
+# @return 0 if the move was invalid
+# @return 1 if the move was valid
+# @return 2 if bot has moved
 def setMove(r, c):
   global player
   
@@ -25,8 +28,11 @@ def setMove(r, c):
   else:
     player = 'X'
   
-  if bot and player is 'O':
+  if bot and player is 'O' and not finished():
     botMove()
+    print("Bot has moved")
+    return 2
+
   else:
     print(player+" has the next move")
   
@@ -122,3 +128,7 @@ def startGame(Gamesize, usebot):
     print("Opponent is bot")
   else:
     print("Opponent is human")
+    
+def getSize():
+  global Size
+  return Size

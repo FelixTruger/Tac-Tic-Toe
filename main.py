@@ -26,8 +26,11 @@ def showMap(Gamesize, bot):
           newButton = tk.Button(MainWindow, text=state, borderwidth=1)
           newButton.config(height=Buttonsize, width=Buttonsize);
           newButton.grid(row=r, column=c)
-          newButton["command"] = partial(Move, r, c, newButton)
           buttons[r][c] = newButton
+    
+    for r in range(Size):
+        for c in range(Size):
+            buttons[r][c]["command"] = partial(Move, r, c, buttons)
           
     # add Menu button to MainWindow
     def localShowMenu():
@@ -39,15 +42,28 @@ def showMap(Gamesize, bot):
     btn_Menu.config(width=Size*Buttonsize)
     btn_Menu.grid(row=Size, column=0, columnspan=Size) 
 
-def Move(r, c, btn):
+def Move(r, c, buttons):
     result = game.setMove(r, c)
-    if result is 1:
-        btn["text"] = game.getValue(r, c)
     
-    winner = game.finished()
-    if winner:
-        tkMsg.showinfo("Spielende", str(winner)+" hat das Spiel gewonnen!")
-        showMenu()
+    # do things only when the move was valid
+    if result:        
+        # the bot has moved after player, so the field must be refreshed to 
+        # display moves made by bot
+        if result is 2 or result is 3:
+            refresh_field(buttons)
+        else: # update only the button that was set by the player
+            buttons[r][c]["text"] = game.getValue(r, c)
+            
+        winner = game.finished()
+        if winner:
+            tkMsg.showinfo("Spielende", str(winner)+" hat das Spiel gewonnen!")
+            showMenu()
+
+def refresh_field(buttons):
+    for r in range(game.getSize()):
+        for c in range(game.getSize()):
+            buttons[r][c]["text"] = game.getValue(r, c)
+
 
 def closeMenu():
     MainWindow.destroy()
@@ -81,7 +97,7 @@ def showMenu():
     lbl_KI["text"] = "Gegen KI"
 
     btn_exit["command"] = closeMenu
-    btn_KI["command"] = partial(localStartGame, 0) # 1 means to use bot as opponent
+    btn_KI["command"] = partial(localStartGame, 1) # 1 means to use bot as opponent
 
     lbl_gamesize.grid(row=0, column=0)
     txt_gamesize.grid(row=0, column=1)
