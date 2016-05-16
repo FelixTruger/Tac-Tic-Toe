@@ -50,7 +50,8 @@ def botMove():
   if not setMove(row, col):
     botMove()
     
-
+# @return 0 if game is not finished
+# @return else name of player who has won
 def finished():
   global Size
   
@@ -64,7 +65,7 @@ def finished():
         if col is Size-1:
           return current
       else:
-        current = 'no win' 
+        break 
         
   # search for cols all the same value
   for col in range(Size):
@@ -76,7 +77,7 @@ def finished():
         if row is Size-1:
           return current
       else:
-        current = 'no win' 
+        break 
   
   # search first diagonal for the same value
   current = 'start'
@@ -87,7 +88,7 @@ def finished():
       if cr is Size-1:
         return current
     else:
-      current = 'no win'     
+      break     
       
   # search second diagonal for the same value
   current = 'start'
@@ -98,7 +99,7 @@ def finished():
       if cr is Size-1:
         return current
     else:
-      current = 'no win'   
+      break   
   
   # last but not least: check whether all fields have been set
   for col in range(Size):
@@ -107,6 +108,7 @@ def finished():
       if getValue(row, col) is '':
         return 0  
   
+  # all fields set but no return until now? then the game is over without a winner
   return "Keiner der beiden Spieler"
 
 def startGame(Gamesize, usebot):
