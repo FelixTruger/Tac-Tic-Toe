@@ -132,3 +132,12 @@ def startGame(Gamesize, usebot):
 def getSize():
   global Size
   return Size
+
+if __name__ == '__main__':
+    print("Tac-Tic-Toe Game module Copyright (C) 2016  Felix & Hagen\n\
+    This program comes with ABSOLUTELY NO WARRANTY; for details see GPL.\n\
+    This is free software, and you are welcome to redistribute it\n\
+    under certain conditions; see GPL for details.")
+    print()
+    print(">>>>>This module has no functionality on its own!<<<<<")
+    print("Run main.py or use this module in another python script by importing it.")
