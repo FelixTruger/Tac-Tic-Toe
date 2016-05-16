@@ -27,10 +27,7 @@ def showMap(Gamesize, bot):
           newButton.config(height=Buttonsize, width=Buttonsize);
           newButton.grid(row=r, column=c)
           buttons[r][c] = newButton
-    
-    for r in range(Size):
-        for c in range(Size):
-            buttons[r][c]["command"] = partial(Move, r, c, buttons)
+          buttons[r][c]["command"] = partial(Move, r, c, buttons)
           
     # add Menu button to MainWindow
     def localShowMenu():
