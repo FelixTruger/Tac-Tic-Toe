@@ -1,12 +1,10 @@
-import random
-
 from functools import partial
 # partial enables us to make a function wrapper for buttons
 
 import tkinter as tk
 import tkinter.messagebox as tkMsg
-import socket
 import game
+import connector
 
 MainWindow = tk.Tk()
 Buttonsize = 5;
@@ -68,9 +66,17 @@ def closeMenu():
 def showMenu():
     def localStartGame(bot):
         showMap(txt_gamesize.get(), int(bot))
+
+    # hardcoded port for the client-server connection
+    port = 5600
+
+    def connectClient():
+        ip = txt_IP.get()
+        connector.startClient(ip, port)
         
     # in case the window was used before, clean it up
     clearWindow(MainWindow)
+
 
     lbl_gamesize = tk.Label(MainWindow)
     txt_gamesize = tk.Entry(MainWindow)
@@ -95,6 +101,8 @@ def showMenu():
 
     btn_exit["command"] = closeMenu
     btn_KI["command"] = partial(localStartGame, 1) # 1 means to use bot as opponent
+    btn_newGame["command"] = partial(connector.startServer, port)
+    btn_join["command"] = connectClient
 
     lbl_gamesize.grid(row=0, column=0)
     txt_gamesize.grid(row=0, column=1)
