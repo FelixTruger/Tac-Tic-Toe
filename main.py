@@ -4,19 +4,26 @@ from functools import partial
 import tkinter as tk
 import tkinter.messagebox as tkMsg
 import game
-import connector
+import connector as connection
+from enum import Enum
+
+
+class mode(Enum):
+    BOT = 1
+    SERVER = 2
+    CLIENT = 3
 
 MainWindow = tk.Tk()
+MainWindow.title("Tac-Tic-Toe")
 Buttonsize = 5
-connection = None
 
 # hardcoded port for the client-server connection
 port = 5601
 
 
-def showMap(Gamesize, mode):
+def showMap(Gamesize, Gamemode):
     Size = int(Gamesize)
-    game.startGame(Gamesize, int(mode)==1)
+    game.startGame(Gamesize, Gamemode==mode.BOT)
     buttons = [[None for x in range(Size)] for y in range(Size)]
     
     # in case the window was used before, clean it up
@@ -30,7 +37,7 @@ def showMap(Gamesize, mode):
           newButton.config(height=Buttonsize, width=Buttonsize);
           newButton.grid(row=r, column=c)
           buttons[r][c] = newButton
-          buttons[r][c]["command"] = partial(Move, r, c, buttons)
+          buttons[r][c]["command"] = partial(Move, r, c, buttons, 1, Gamemode) # 1: it's a move of the player on this end
           
     # add Menu button to MainWindow
     def localShowMenu():
@@ -40,9 +47,12 @@ def showMap(Gamesize, mode):
     btn_Menu = tk.Button(MainWindow, text='Menü')
     btn_Menu["command"] = localShowMenu
     btn_Menu.config(width=Size*Buttonsize)
-    btn_Menu.grid(row=Size, column=0, columnspan=Size) 
+    btn_Menu.grid(row=Size, column=0, columnspan=Size)
+    
+    if (Gamemode == mode.CLIENT):
+        waitForMove(buttons, Gamemode) # Server has the first move
 
-def Move(r, c, buttons):
+def Move(r, c, buttons, ownmove, Gamemode):
     result = game.setMove(r, c)
     
     # do things only when the move was valid
@@ -57,9 +67,33 @@ def Move(r, c, buttons):
         winner = game.finished()
         if winner:
             tkMsg.showinfo("Spielende", str(winner)+" hat das Spiel gewonnen!")
+            if (ownmove and (Gamemode == mode.SERVER or Gamemode == mode.CLIENT)):
+                sendMove(r, c) # send move to opponent, so he also knows who won
+            connection.close()
             showMenu()
-            
         
+        if (ownmove and (Gamemode == mode.SERVER or Gamemode == mode.CLIENT)):
+            sendMove(r, c)
+            waitForMove(buttons, Gamemode)
+            
+            
+def waitForMove(buttons, Gamemode):
+    global connection
+    if connection is None:
+        print("Fehler: Warten auf Zug des Gegenspielers nicht möglich. Es besteht keine Verbindung!")
+    else:
+        message = connection.receive()
+        row = int(message.split('#')[0])
+        col = int(message.split('#')[1])
+        Move(row, col, buttons, 0, Gamemode)
+
+def sendMove(r, c):
+    global connection
+    if connection is None:
+        print("Fehler: Senden des Zuges nicht möglich. Es besteht keine Verbindung!")
+    else:
+        message = str(r)+'#'+str(c)
+        connection.send(message)
 
 def refresh_field(buttons):
     for r in range(game.getSize()):
@@ -74,28 +108,30 @@ def showMenu():
     global port
 
     def localStartGame(mode):
-        showMap(txt_gamesize.get(), int(mode))
+        showMap(txt_gamesize.get(), mode)
 
     def connectClient():
         ip = txt_IP.get()
-        if (connector.startClient(ip, port)):
+        global connection
+        if (connection.startClient(ip, port)):
             message = "Someone there?"
-            connector.send(message)
+            connection.send(message)
             print("Client: Sent message: "+message)
-            print("Client: Received message: "+str(connector.receive()))
-            connector.close()
+            print("Client: Received message: "+str(connection.receive()))
+            showMap(txt_gamesize.get(), mode.CLIENT)
         else:
             print("Connection failed.")
     
     def connectServer():
-        if (connector.startServer(port)):
-            message = str(connector.receive())
+        global connection
+        if (connection.startServer(port)):
+            message = str(connection.receive())
             if message:
                 print("Server: Received message: "+message)
                 message = "Acknowledged!"
-                connector.send(message)
+                connection.send(message)
                 print("Server: Sent message: "+message)
-                connector.close()
+                showMap(txt_gamesize.get(), mode.SERVER)
         else:
             print("Connection failed.")
                 
@@ -125,7 +161,7 @@ def showMenu():
     lbl_KI["text"] = "Gegen KI"
 
     btn_exit["command"] = closeMenu
-    btn_KI["command"] = partial(localStartGame, 1) # 1 means to use bot as opponent
+    btn_KI["command"] = partial(localStartGame, mode.BOT) # 1 means to use bot as opponent
     btn_newGame["command"] = connectServer
     btn_join["command"] = connectClient
 
