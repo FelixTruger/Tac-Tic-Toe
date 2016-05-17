@@ -18,7 +18,7 @@ MainWindow.title("Tac-Tic-Toe")
 Buttonsize = 5
 
 # hardcoded port for the client-server connection
-port = 5601
+port = 5600
 
 
 def showMap(Gamesize, Gamemode):
@@ -66,10 +66,10 @@ def Move(r, c, buttons, ownmove, Gamemode):
             
         winner = game.finished()
         if winner:
-            tkMsg.showinfo("Spielende", str(winner)+" hat das Spiel gewonnen!")
             if (ownmove and (Gamemode == mode.SERVER or Gamemode == mode.CLIENT)):
                 sendMove(r, c) # send move to opponent, so he also knows who won
             connection.close()
+            tkMsg.showinfo("Spielende", str(winner)+" hat das Spiel gewonnen!")
             showMenu()
         
         if (ownmove and (Gamemode == mode.SERVER or Gamemode == mode.CLIENT)):
