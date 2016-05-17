@@ -7,11 +7,16 @@ import game
 import connector
 
 MainWindow = tk.Tk()
-Buttonsize = 5;
+Buttonsize = 5
+connection = None
 
-def showMap(Gamesize, bot):
+# hardcoded port for the client-server connection
+port = 5601
+
+
+def showMap(Gamesize, mode):
     Size = int(Gamesize)
-    game.startGame(Gamesize, int(bot))
+    game.startGame(Gamesize, int(mode)==1)
     buttons = [[None for x in range(Size)] for y in range(Size)]
     
     # in case the window was used before, clean it up
@@ -53,6 +58,8 @@ def Move(r, c, buttons):
         if winner:
             tkMsg.showinfo("Spielende", str(winner)+" hat das Spiel gewonnen!")
             showMenu()
+            
+        
 
 def refresh_field(buttons):
     for r in range(game.getSize()):
@@ -64,16 +71,34 @@ def closeMenu():
     MainWindow.destroy()
 
 def showMenu():
-    def localStartGame(bot):
-        showMap(txt_gamesize.get(), int(bot))
+    global port
 
-    # hardcoded port for the client-server connection
-    port = 5600
+    def localStartGame(mode):
+        showMap(txt_gamesize.get(), int(mode))
 
     def connectClient():
         ip = txt_IP.get()
-        connector.startClient(ip, port)
-        
+        if (connector.startClient(ip, port)):
+            message = "Someone there?"
+            connector.send(message)
+            print("Client: Sent message: "+message)
+            print("Client: Received message: "+str(connector.receive()))
+            connector.close()
+        else:
+            print("Connection failed.")
+    
+    def connectServer():
+        if (connector.startServer(port)):
+            message = str(connector.receive())
+            if message:
+                print("Server: Received message: "+message)
+                message = "Acknowledged!"
+                connector.send(message)
+                print("Server: Sent message: "+message)
+                connector.close()
+        else:
+            print("Connection failed.")
+                
     # in case the window was used before, clean it up
     clearWindow(MainWindow)
 
@@ -101,7 +126,7 @@ def showMenu():
 
     btn_exit["command"] = closeMenu
     btn_KI["command"] = partial(localStartGame, 1) # 1 means to use bot as opponent
-    btn_newGame["command"] = partial(connector.startServer, port)
+    btn_newGame["command"] = connectServer
     btn_join["command"] = connectClient
 
     lbl_gamesize.grid(row=0, column=0)
