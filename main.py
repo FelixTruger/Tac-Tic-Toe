@@ -34,7 +34,7 @@ def showMap(Gamesize, Gamemode):
         for c in range(Size):
           state = str(game.getValue(r, c))
           newButton = tk.Button(MainWindow, text=state, borderwidth=1)
-          newButton.config(height=Buttonsize, width=Buttonsize);
+          newButton.config(height=int(Buttonsize/2), width=Buttonsize);
           newButton.grid(row=r, column=c)
           buttons[r][c] = newButton
           buttons[r][c]["command"] = partial(Move, r, c, buttons, 1, Gamemode) # 1: it's a move of the player on this end
