@@ -124,7 +124,8 @@ def showMenu():
             connection.send(message)
             print("Client: Sent message: "+message)
             print("Client: Received message: "+str(connection.receive()))
-            showMap(txt_gamesize.get(), mode.CLIENT)
+            gamesize = int(connection.receive())
+            showMap(gamesize, mode.CLIENT)
         else:
             print("Connection failed.")
     
@@ -136,9 +137,11 @@ def showMenu():
                 print("Server: Received message: "+message)
                 message = "Acknowledged!"
                 connection.send(message)
-                print("Server: Sent message: "+message)
-                showMap(txt_gamesize.get(), mode.SERVER)
-        else:
+                print("Server: Sent message: " + message)
+                gamesize = txt_gamesize.get()
+                connection.send(str(gamesize))
+
+                showMap(gamesize, mode.SERVER)
             print("Connection failed.")
                 
     # in case the window was used before, clean it up
@@ -171,16 +174,16 @@ def showMenu():
     btn_newGame["command"] = connectServer
     btn_join["command"] = connectClient
 
-    lbl_gamesize.grid(row=0, column=0)
-    txt_gamesize.grid(row=0, column=1)
-    lbl_KI.grid(row=1, column=0)
-    btn_KI.grid(row=1, column=1)
-    lbl_player.grid(row=2, column=0)
-    btn_newGame.grid(row=2, column=1)
+    lbl_gamesize.grid(row=0, column=0, pady=5)
+    txt_gamesize.grid(row=0, column=1, pady=5, padx=5)
+    lbl_KI.grid(row=1, column=0, pady=5)
+    btn_KI.grid(row=1, column=1, pady=5)
+    lbl_player.grid(row=2, column=0, pady=5, padx=5)
+    btn_newGame.grid(row=2, column=1, pady=5)
     btn_join.grid(row=3, column=1)
-    lbl_IP.grid(row=4, column=0)
-    txt_IP.grid(row=4, column=1)
-    btn_exit.grid(row=5, column=1)
+    lbl_IP.grid(row=4, column=0, pady=5)
+    txt_IP.grid(row=4, column=1, pady=5)
+    btn_exit.grid(row=5, column=1, pady=5)
 
     MainWindow.mainloop()
 
