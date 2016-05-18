@@ -48,6 +48,7 @@ def showMap(Gamesize, Gamemode):
     btn_Menu["command"] = localShowMenu
     btn_Menu.config(width=Size*Buttonsize)
     btn_Menu.grid(row=Size, column=0, columnspan=Size)
+    MainWindow.update()
     
     if (Gamemode == mode.CLIENT):
         waitForMove(buttons, Gamemode) # Server has the first move
@@ -68,12 +69,17 @@ def Move(r, c, buttons, ownmove, Gamemode):
         if winner:
             if (ownmove and (Gamemode == mode.SERVER or Gamemode == mode.CLIENT)):
                 sendMove(r, c) # send move to opponent, so he also knows who won
-            connection.close()
-            tkMsg.showinfo("Spielende", str(winner)+" hat das Spiel gewonnen!")
-            showMenu()
+            try:
+                connection.close()
+
+            finally:
+                tkMsg.showinfo("Spielende", str(winner) + " hat das Spiel gewonnen!")
+                showMenu()
+
         
         if (ownmove and (Gamemode == mode.SERVER or Gamemode == mode.CLIENT)):
             sendMove(r, c)
+            MainWindow.update()
             waitForMove(buttons, Gamemode)
             
             
